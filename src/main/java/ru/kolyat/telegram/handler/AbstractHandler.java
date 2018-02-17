@@ -1,14 +1,11 @@
-package ru.kolyat.telegram;
+package ru.kolyat.telegram.handler;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
-@Component
-public class Bot extends TelegramLongPollingBot {
-
+public abstract class AbstractHandler extends TelegramLongPollingBot {
     @Getter
     @Value("${ru.kolyat.telegram.botToken}")
     private String botToken;
@@ -19,6 +16,5 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-
     }
 }

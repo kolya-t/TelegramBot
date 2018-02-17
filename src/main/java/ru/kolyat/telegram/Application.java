@@ -4,10 +4,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
-import org.telegram.telegrambots.generics.LongPollingBot;
+import ru.kolyat.telegram.handler.WeatherHandler;
 
+@EnableScheduling
 @SpringBootApplication
 public class Application {
     private static final TelegramBotsApi api;
@@ -22,7 +24,7 @@ public class Application {
     }
 
     @Bean
-    public CommandLineRunner registerBot(LongPollingBot bot) {
-        return args -> api.registerBot(bot);
+    public CommandLineRunner registerBot(WeatherHandler weatherHandler) {
+        return args -> api.registerBot(weatherHandler);
     }
 }

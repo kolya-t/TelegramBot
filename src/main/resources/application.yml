@@ -1,0 +1,7 @@
+ru:
+  kolyat:
+    telegram:
+      botToken: bot_token
+      botUsername: bot_username
+      subscriberChatId: your_telegram_chat_id
+      woeid: your_city_woeid

@@ -1,4 +1,4 @@
-package ru.kolyat.telegram.handler;
+package kolyat.telegram.handler;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,11 +7,11 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
 public abstract class AbstractHandler extends TelegramLongPollingBot {
     @Getter
-    @Value("${ru.kolyat.telegram.botToken}")
+    @Value("${kolyat.telegram-bot.bot-token}")
     private String botToken;
 
     @Getter
-    @Value("${ru.kolyat.telegram.botUsername}")
+    @Value("${kolyat.telegram-bot.bot-username}")
     private String botUsername;
 
     @Override

@@ -83,6 +83,12 @@
       <groupId>com.github.fedy2</groupId>
       <artifactId>yahoo-weather-java-api</artifactId>
       <version>${yahoo-weather-java-api.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-simple</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/javax.xml/jaxb-api -->

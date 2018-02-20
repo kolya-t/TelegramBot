@@ -1,0 +1,1 @@
+worker: mvn spring-boot:run $JAVA_OPTS -Dspring.profiles.active=heroku

@@ -4,8 +4,8 @@ import com.github.fedy2.weather.YahooWeatherService;
 import com.github.fedy2.weather.data.Channel;
 import com.github.fedy2.weather.data.Forecast;
 import com.github.fedy2.weather.data.unit.DegreeUnit;
-import kolyat.telegram.domain.WeatherCity;
-import kolyat.telegram.repository.WeatherCityRepository;
+import kolyat.telegram.domain.ChatParameters;
+import kolyat.telegram.repository.ChatParametersRepository;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,26 +41,26 @@ public class WeatherHandler extends AbstractHandler {
     private YahooWeatherService weatherService;
 
     @Autowired
-    private WeatherCityRepository weatherCityRepository;
+    private ChatParametersRepository chatParametersRepository;
 
     @Autowired
     private TaskScheduler taskScheduler;
 
     @PostConstruct
     public void postConstructorSchedule() {
-        weatherCityRepository.findAllByIsEnabledScheduling(true).forEach(this::schedule);
+        chatParametersRepository.findAllByIsEnabledScheduling(true).forEach(this::schedule);
     }
 
-    private void schedule(WeatherCity weatherCity) {
-        taskScheduler.schedule(() -> sendDailyForecast(weatherCity), new CronTrigger(SIX_THIRTY_CRON));
+    private void schedule(ChatParameters chatParameters) {
+        taskScheduler.schedule(() -> sendDailyForecast(chatParameters), new CronTrigger(SIX_THIRTY_CRON));
     }
 
-    private void sendDailyForecast(WeatherCity weatherCity) {
+    private void sendDailyForecast(ChatParameters chatParameters) {
         try {
-            Channel forecast = getForecastChannelForLocation(weatherCity.getLocation());
+            Channel forecast = getForecastChannelForLocation(chatParameters.getLocation());
             Forecast today = forecast.getItem().getForecasts().get(0);
             String message = String.format("Сегодня будет\n*%d .. %d°C*", today.getLow(), today.getHigh());
-            execute(new SendMessage(weatherCity.getChatId(), message).enableMarkdown(true));
+            execute(new SendMessage(chatParameters.getChatId(), message).enableMarkdown(true));
         } catch (TelegramApiException e) {
             log.error("Error sending message", e);
         }
@@ -93,20 +93,20 @@ public class WeatherHandler extends AbstractHandler {
                             .setText("Я буду узнавать для вас прогноз погоды. " +
                                     "Отправьте мне вашу геопозицию, чтобы я мог начать."));
                 } else if (text.equals("/end")) {
-                    WeatherCity weatherCity = weatherCityRepository.findByChatId(message.getChatId());
-                    if (weatherCity != null) {
-                        weatherCityRepository.delete(weatherCity);
+                    ChatParameters chatParameters = chatParametersRepository.findByChatId(message.getChatId());
+                    if (chatParameters != null) {
+                        chatParametersRepository.delete(chatParameters);
                         execute(new SendMessage()
                                 .setChatId(message.getChatId())
                                 .setReplyMarkup(new ReplyKeyboardRemove())
                                 .setText("Удаляю все данные о вас из базы. Больше не буду присылать вам погоду."));
                     }
                 } else if (text.equals(SUBSCRIBE_FOR_SCHEDULING_TEXT)) {
-                    WeatherCity weatherCity = weatherCityRepository.findByChatId(message.getChatId());
-                    if (weatherCity != null && !weatherCity.getIsEnabledScheduling()) {
-                        schedule(weatherCity);
-                        weatherCity.setIsEnabledScheduling(true);
-                        weatherCityRepository.save(weatherCity);
+                    ChatParameters chatParameters = chatParametersRepository.findByChatId(message.getChatId());
+                    if (chatParameters != null && !chatParameters.getIsEnabledScheduling()) {
+                        schedule(chatParameters);
+                        chatParameters.setIsEnabledScheduling(true);
+                        chatParametersRepository.save(chatParameters);
                         execute(new SendMessage()
                                 .setChatId(message.getChatId())
                                 .setText("Я буду присылать вам прогноз погоды каждый день в 6:30")
@@ -114,7 +114,7 @@ public class WeatherHandler extends AbstractHandler {
                     }
                     //todo: если уже зарегистрирован
                 }
-            } else if (message.hasLocation() && !weatherCityRepository.existsByChatId(message.getChatId())) {
+            } else if (message.hasLocation() && !chatParametersRepository.existsByChatId(message.getChatId())) {
                 Location location = message.getLocation();
                 Channel channel = getForecastChannelForLocation(location);
                 if (channel != null) {
@@ -136,7 +136,7 @@ public class WeatherHandler extends AbstractHandler {
                                     channel.getLocation().getRegion(),
                                     channel.getLocation().getCountry())));
 
-                    weatherCityRepository.save(new WeatherCity(message.getChatId(), location));
+                    chatParametersRepository.save(new ChatParameters(message.getChatId(), location));
                 } else {
                     new SendMessage().setText("Не могу получить данные о погоде по вашей геопозиции");
                 }

@@ -1,5 +1,6 @@
 package kolyat.telegram.command;
 
+import kolyat.telegram.WeatherBot;
 import kolyat.telegram.domain.ChatWeather;
 import kolyat.telegram.repository.ChatWeatherRepository;
 import lombok.SneakyThrows;
@@ -35,9 +36,11 @@ public class UnsubscribeCommand extends BotCommand {
         } else if (chatWeather.getSubscribed()) {
             chatWeather.setSubscribed(false);
             chatWeatherRepository.save(chatWeather);
-            answer.setText("Вы отписались от рассылки прогноза погоды в 6:30");
+            answer.setReplyMarkup(WeatherBot.createKeyboardMarkup(true, false))
+                    .setText("Вы отписались от рассылки прогноза погоды в 6:30");
         } else {
-            answer.setText("Вы не подписаны на ежедневный прогноз погоды");
+            answer.setReplyMarkup(WeatherBot.createKeyboardMarkup(true, false))
+                    .setText("Вы не подписаны на ежедневный прогноз погоды");
         }
 
         absSender.execute(answer);

@@ -19,7 +19,6 @@ import java.io.IOException;
 @Slf4j
 @Service
 public class WeatherService {
-
     @Autowired
     private YahooWeatherService weatherService;
 
@@ -28,6 +27,16 @@ public class WeatherService {
             Channel forecast = getForecastChannelForLocation(chatWeather.getLocation());
             Forecast today = forecast.getItem().getForecasts().get(0);
             String message = String.format("Сегодня будет\n*%d* .. *%d*°C", today.getLow(), today.getHigh());
+            absSender.execute(new SendMessage(chatWeather.getChatId(), message).enableMarkdown(true));
+        } catch (TelegramApiException e) {
+            log.error("Error sending message", e);
+        }
+    }
+
+    public void sendForecastForNow(AbsSender absSender, ChatWeather chatWeather) {
+        try {
+            Channel forecast = getForecastChannelForLocation(chatWeather.getLocation());
+            String message = String.format("Сейчас *%d*°C", forecast.getItem().getCondition().getTemp());
             absSender.execute(new SendMessage(chatWeather.getChatId(), message).enableMarkdown(true));
         } catch (TelegramApiException e) {
             log.error("Error sending message", e);

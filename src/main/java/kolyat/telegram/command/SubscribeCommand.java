@@ -1,5 +1,6 @@
 package kolyat.telegram.command;
 
+import kolyat.telegram.WeatherBot;
 import kolyat.telegram.domain.ChatWeather;
 import kolyat.telegram.repository.ChatWeatherRepository;
 import lombok.SneakyThrows;
@@ -35,9 +36,11 @@ public class SubscribeCommand extends BotCommand {
         } else if (!chatWeather.getSubscribed()) {
             chatWeather.setSubscribed(true);
             chatWeatherRepository.save(chatWeather);
-            answer.setText("Я буду присылать вам прогноз погоды каждый день в 6:30");
+            answer.setReplyMarkup(WeatherBot.createKeyboardMarkup(true, false))
+                    .setText("Я буду присылать вам прогноз погоды каждый день в 6:30");
         } else {
-            answer.setText("Вы уже подписаны на ежедневный прогноз погоды");
+            answer.setReplyMarkup(WeatherBot.createKeyboardMarkup(true, false))
+                    .setText("Вы уже подписаны на ежедневный прогноз погоды");
         }
 
         absSender.execute(answer);

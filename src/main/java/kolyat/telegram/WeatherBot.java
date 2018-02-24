@@ -15,6 +15,7 @@ import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.Location;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -27,22 +28,7 @@ import java.util.Collections;
 
 @Component
 public class WeatherBot extends TelegramLongPollingCommandBot {
-    public static final String WEATHER_FOR_NOW = "☂ Погода сейчас";
-
-    public static ReplyKeyboardMarkup createKeyboardMarkup(boolean withWeatherForNow, boolean withGeolocation) {
-        KeyboardRow row = new KeyboardRow();
-        if (withWeatherForNow) {
-            row.add(new KeyboardButton(WEATHER_FOR_NOW));
-        }
-        if (withGeolocation) {
-            row.add(new KeyboardButton("\uD83C\uDF0E Отправить геопозицию")
-                    .setRequestLocation(true));
-        }
-        return new ReplyKeyboardMarkup()
-                .setKeyboard(Collections.singletonList(row))
-                .setResizeKeyboard(true)
-                .setOneTimeKeyboard(true);
-    }
+    private static final String WEATHER_FOR_NOW = "☂ Погода сейчас";
 
     @Getter
     @Value("${kolyat.telegram-bot.bot-token}")
@@ -59,8 +45,25 @@ public class WeatherBot extends TelegramLongPollingCommandBot {
         registerAll(commands);
     }
 
-//    @Scheduled(cron = "0 0/30 6 * * *")
-    @Scheduled(cron = "*/3 * * * * *")
+    public static ReplyKeyboard createKeyboardMarkup(boolean withWeatherForNow, boolean withGeolocation) {
+        KeyboardRow row = new KeyboardRow();
+        if (withWeatherForNow) {
+            row.add(new KeyboardButton(WEATHER_FOR_NOW));
+        }
+        if (withGeolocation) {
+            row.add(new KeyboardButton("\uD83C\uDF0E Отправить геопозицию")
+                    .setRequestLocation(true));
+        }
+
+        return !withWeatherForNow && !withGeolocation ?
+                new ReplyKeyboardRemove() :
+                new ReplyKeyboardMarkup()
+                        .setKeyboard(Collections.singletonList(row))
+                        .setResizeKeyboard(true)
+                        .setOneTimeKeyboard(true);
+    }
+
+    @Scheduled(cron = "0 0/30 6 * * *")
     public void sendForecastForTodayToAll() {
         for (ChatWeather chatWeather : chatWeatherRepository.findAllBySubscribed(true)) {
             weatherService.sendForecastForToday(this, chatWeather);
@@ -74,7 +77,10 @@ public class WeatherBot extends TelegramLongPollingCommandBot {
             if (message.hasLocation()) {
                 processLocation(message.getLocation(), message.getChat());
             } else if (message.hasText() && message.getText().equals(WEATHER_FOR_NOW)) {
-                System.out.println("СДЕЛАТЬ ЧТО НИБУДЬ");
+                ChatWeather chatWeather = chatWeatherRepository.findByChatId(message.getChatId());
+                if (chatWeather != null) {
+                    weatherService.sendForecastForNow(this, chatWeather);
+                }
             }
         }
     }

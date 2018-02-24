@@ -13,14 +13,37 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.Location;
+import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardRemove;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.bots.commandbot.commands.BotCommand;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
+import java.util.Collections;
+
 @Component
 public class WeatherBot extends TelegramLongPollingCommandBot {
+    public static final String WEATHER_FOR_NOW = "☂ Погода сейчас";
+
+    public static ReplyKeyboardMarkup createKeyboardMarkup(boolean withWeatherForNow, boolean withGeolocation) {
+        KeyboardRow row = new KeyboardRow();
+        if (withWeatherForNow) {
+            row.add(new KeyboardButton(WEATHER_FOR_NOW));
+        }
+        if (withGeolocation) {
+            row.add(new KeyboardButton("\uD83C\uDF0E Отправить геопозицию")
+                    .setRequestLocation(true));
+        }
+        return new ReplyKeyboardMarkup()
+                .setKeyboard(Collections.singletonList(row))
+                .setResizeKeyboard(true)
+                .setOneTimeKeyboard(true);
+    }
+
     @Getter
     @Value("${kolyat.telegram-bot.bot-token}")
     private String botToken;
@@ -36,7 +59,8 @@ public class WeatherBot extends TelegramLongPollingCommandBot {
         registerAll(commands);
     }
 
-    @Scheduled(cron = "0 0/30 6 * * *")
+//    @Scheduled(cron = "0 0/30 6 * * *")
+    @Scheduled(cron = "*/3 * * * * *")
     public void sendForecastForTodayToAll() {
         for (ChatWeather chatWeather : chatWeatherRepository.findAllBySubscribed(true)) {
             weatherService.sendForecastForToday(this, chatWeather);
@@ -45,8 +69,13 @@ public class WeatherBot extends TelegramLongPollingCommandBot {
 
     @Override
     public void processNonCommandUpdate(Update update) {
-        if (update.hasMessage() && update.getMessage().hasLocation()) {
-            processLocation(update.getMessage().getLocation(), update.getMessage().getChat());
+        if (update.hasMessage()) {
+            Message message = update.getMessage();
+            if (message.hasLocation()) {
+                processLocation(message.getLocation(), message.getChat());
+            } else if (message.hasText() && message.getText().equals(WEATHER_FOR_NOW)) {
+                System.out.println("СДЕЛАТЬ ЧТО НИБУДЬ");
+            }
         }
     }
 
@@ -58,21 +87,21 @@ public class WeatherBot extends TelegramLongPollingCommandBot {
 
         Channel channel = weatherService.getForecastChannelForLocation(location);
         ChatWeather chatWeather = chatWeatherRepository.findByChatId(chat.getId());
-        if (chatWeather != null) {
-            answer.enableMarkdown(true)
-                    .setText("Вы уже есть в нашей базе данных (*%s*, *%s*, *%s*). " +
-                            "Если хотите изменить данные о вашем местоположении, выполните /start");
-        } else if (channel != null) {
-            chatWeatherRepository.save(new ChatWeather(chat.getId(), location));
-            answer.enableMarkdown(true)
-                    .setReplyMarkup(new ReplyKeyboardRemove())
-                    .setText(String.format("Буду получать данные о погоде для *%s*, *%s*, *%s*. Теперь можете " +
-                                    "разрешить мне присылать вам прогноз погоды в 6:30, выполнив /subscribe",
-                            channel.getLocation().getCity(),
-                            channel.getLocation().getRegion(),
-                            channel.getLocation().getCountry()));
-        } else {
-            answer.setText("Не могу получить данные о погоде по вашей геопозиции");
+
+        if (chatWeather == null) {
+            if (channel != null) {
+                chatWeatherRepository.save(new ChatWeather(chat.getId(), location));
+                answer.enableMarkdown(true)
+                        .setReplyMarkup(createKeyboardMarkup(true, false))
+                        .setText(String.format("Буду получать данные о погоде для *%s*, *%s*, *%s*. Теперь можете " +
+                                        "разрешить мне присылать вам прогноз погоды в 6:30, выполнив /subscribe",
+                                channel.getLocation().getCity(),
+                                channel.getLocation().getRegion(),
+                                channel.getLocation().getCountry()));
+            } else {
+                answer.setReplyMarkup(createKeyboardMarkup(false, chat.isUserChat()))
+                        .setText("Не могу получить данные о погоде по вашей геопозиции");
+            }
         }
 
         execute(answer);

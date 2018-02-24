@@ -3,7 +3,6 @@ package kolyat.telegram.command;
 import kolyat.telegram.domain.ChatWeather;
 import kolyat.telegram.repository.ChatWeatherRepository;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
@@ -14,7 +13,6 @@ import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commandbot.commands.BotCommand;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
-@Slf4j
 @Component
 public class SubscribeCommand extends BotCommand {
     @Autowired

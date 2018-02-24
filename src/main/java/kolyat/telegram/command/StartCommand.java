@@ -1,5 +1,6 @@
 package kolyat.telegram.command;
 
+import kolyat.telegram.domain.ChatWeather;
 import kolyat.telegram.repository.ChatWeatherRepository;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +29,9 @@ public class StartCommand extends BotCommand {
     @Override
     @SneakyThrows(TelegramApiException.class)
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
-        if (chatWeatherRepository.existsByChatId(chat.getId())) {
-            chatWeatherRepository.deleteByChatId(chat.getId());
+        ChatWeather chatWeather = chatWeatherRepository.findByChatId(chat.getId());
+        if (chatWeather != null) {
+            chatWeatherRepository.delete(chatWeather);
         }
 
         SendMessage answer = new SendMessage()

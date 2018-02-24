@@ -23,10 +23,8 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public CommandLineRunner registerBot(Bot bot) {
-        return args -> {
-            api.registerBot(bot);
-        };
+    public CommandLineRunner registerBot(WeatherBot bot) {
+        return args -> api.registerBot(bot);
     }
 
     @Bean

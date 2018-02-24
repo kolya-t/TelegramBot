@@ -34,7 +34,7 @@ public class WeatherService {
         }
     }
 
-    private Channel getForecastChannelForLocation(Location location) {
+    public Channel getForecastChannelForLocation(Location location) {
         Channel channel = null;
         String coordinates = String.format("(%s,%s)", location.getLatitude(), location.getLongitude());
         try {

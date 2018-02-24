@@ -24,12 +24,17 @@ public class StopCommand extends BotCommand {
     @Override
     @SneakyThrows(TelegramApiException.class)
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
+        SendMessage answer = new SendMessage()
+                .setChatId(chat.getId())
+                .setReplyMarkup(new ReplyKeyboardRemove());
+
         if (chatWeatherRepository.existsByChatId(chat.getId())) {
             chatWeatherRepository.deleteByChatId(chat.getId());
-            absSender.execute(new SendMessage()
-                    .setChatId(chat.getId())
-                    .setReplyMarkup(new ReplyKeyboardRemove())
-                    .setText("Удаляю все данные о вас из базы. Больше не буду присылать вам погоду."));
+            answer.setText("Удаляю все данные о вас из базы. Больше не буду присылать вам погоду.");
+        } else {
+            answer.setText("Вас нет в моей базе данных");
         }
+
+        absSender.execute(answer);
     }
 }

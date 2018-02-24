@@ -3,7 +3,6 @@ package kolyat.telegram.command;
 import kolyat.telegram.domain.ChatWeather;
 import kolyat.telegram.repository.ChatWeatherRepository;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
@@ -14,14 +13,13 @@ import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commandbot.commands.BotCommand;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
-@Slf4j
 @Component
-public class SubscribeCommand extends BotCommand {
+public class UnsubscribeCommand extends BotCommand {
     @Autowired
     private ChatWeatherRepository chatWeatherRepository;
 
-    public SubscribeCommand() {
-        super("subscribe", "");
+    public UnsubscribeCommand() {
+        super("unsubscribe", "");
     }
 
     @Override
@@ -34,12 +32,12 @@ public class SubscribeCommand extends BotCommand {
         ChatWeather chatWeather = chatWeatherRepository.findByChatId(chat.getId());
         if (chatWeather == null) {
             answer.setText("Вас нет в моей базе данных. Начните сначала (/start)");
-        } else if (!chatWeather.getSubscribed()) {
-            chatWeather.setSubscribed(true);
+        } else if (chatWeather.getSubscribed()) {
+            chatWeather.setSubscribed(false);
             chatWeatherRepository.save(chatWeather);
-            answer.setText("Я буду присылать вам прогноз погоды каждый день в 6:30");
+            answer.setText("Вы отписались от рассылки прогноза погоды в 6:30");
         } else {
-            answer.setText("Вы уже подписаны на ежедневный прогноз погоды");
+            answer.setText("Вы не подписаны на ежедневный прогноз погоды");
         }
 
         absSender.execute(answer);

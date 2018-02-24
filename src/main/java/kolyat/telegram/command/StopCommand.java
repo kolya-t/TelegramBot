@@ -26,10 +26,10 @@ public class StopCommand extends BotCommand {
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
         if (chatWeatherRepository.existsByChatId(chat.getId())) {
             chatWeatherRepository.deleteByChatId(chat.getId());
+            absSender.execute(new SendMessage()
+                    .setChatId(chat.getId())
+                    .setReplyMarkup(new ReplyKeyboardRemove())
+                    .setText("Удаляю все данные о вас из базы. Больше не буду присылать вам погоду."));
         }
-        absSender.execute(new SendMessage()
-                .setChatId(chat.getId())
-                .setReplyMarkup(new ReplyKeyboardRemove())
-                .setText("Удаляю все данные о вас из базы. Больше не буду присылать вам погоду."));
     }
 }

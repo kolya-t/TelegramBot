@@ -1,1 +1,1 @@
-worker: java $JAVA_OPTS -jar -Dspring.profiles.active=production target/telegram-bot-1.0.0.jar
+worker: java $JAVA_OPTS -jar -Dspring.profiles.active=production target/weather-bot-1.0.0.jar

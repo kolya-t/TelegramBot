@@ -33,7 +33,7 @@ public class SubscribeCommand extends BotCommand {
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
         ChatWeather chatWeather = chatWeatherRepository.findByChatId(chat.getId());
         if (chatWeather != null && !chatWeather.getSubscribed()) {
-            weatherService.schedule(chatWeather);
+            weatherService.schedule(absSender, chatWeather);
             chatWeather.setSubscribed(true);
             chatWeatherRepository.save(chatWeather);
             absSender.execute(new SendMessage()

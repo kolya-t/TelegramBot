@@ -35,7 +35,7 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public YahooWeatherService weatherService() throws JAXBException {
+    public YahooWeatherService yahooWeatherService() throws JAXBException {
         return new YahooWeatherService();
     }
 }

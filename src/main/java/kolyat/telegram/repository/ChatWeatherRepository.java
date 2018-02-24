@@ -10,6 +10,4 @@ public interface ChatWeatherRepository extends CrudRepository<ChatWeather, Long>
     List<ChatWeather> findAllBySubscribed(boolean subscribed);
 
     ChatWeather findByChatId(Long chatId);
-
-    boolean existsByChatId(Long chatId);
 }

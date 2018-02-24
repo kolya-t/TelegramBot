@@ -5,26 +5,25 @@ import com.github.fedy2.weather.data.Channel;
 import com.github.fedy2.weather.data.Forecast;
 import com.github.fedy2.weather.data.unit.DegreeUnit;
 import kolyat.telegram.domain.ChatWeather;
-import kolyat.telegram.repository.ChatWeatherRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Location;
+import org.telegram.telegrambots.bots.AbsSender;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
 
-import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
 @Slf4j
-@Component
+@Service
 public class WeatherService {
-    //    private static final String SIX_THIRTY_CRON = "0 0/30 6 * * *";
-    private static final String SIX_THIRTY_CRON = "*/3 * * * * *";
-
-    @Autowired
-    private ChatWeatherRepository chatWeatherRepository;
+    //    private static final String SIX_THIRTY_TRIGGER = new CronTrigger("0 0/30 6 * * *");
+    private static final Trigger SIX_THIRTY_TRIGGER = new CronTrigger("*/3 * * * * *");
 
     @Autowired
     private YahooWeatherService weatherService;
@@ -32,27 +31,19 @@ public class WeatherService {
     @Autowired
     private TaskScheduler taskScheduler;
 
-//    @Autowired
-//    private AbsSender absSender;
-
-    @PostConstruct
-    public void postConstructorSchedule() {
-        chatWeatherRepository.findAllBySubscribed(true).forEach(this::schedule);
+    public void schedule(AbsSender absSender, ChatWeather chatWeather) {
+        taskScheduler.schedule(() -> sendForecastForToday(absSender, chatWeather), SIX_THIRTY_TRIGGER);
     }
 
-    public void schedule(ChatWeather chatWeather) {
-        taskScheduler.schedule(() -> sendForecastForToday(chatWeather), new CronTrigger(SIX_THIRTY_CRON));
-    }
-
-    private void sendForecastForToday(ChatWeather chatWeather) {
-//        try {
-        Channel forecast = getForecastChannelForLocation(chatWeather.getLocation());
-        Forecast today = forecast.getItem().getForecasts().get(0);
-        String message = String.format("Сегодня будет\n*%d .. %d°C*", today.getLow(), today.getHigh());
-//            absSender.execute(new SendMessage(chatWeather.getChatId(), message).enableMarkdown(true));
-//        } catch (TelegramApiException e) {
-//            log.error("Error sending message", e);
-//        }
+    private void sendForecastForToday(AbsSender absSender, ChatWeather chatWeather) {
+        try {
+            Channel forecast = getForecastChannelForLocation(chatWeather.getLocation());
+            Forecast today = forecast.getItem().getForecasts().get(0);
+            String message = String.format("Сегодня будет\n*%d* .. *%d*°C", today.getLow(), today.getHigh());
+            absSender.execute(new SendMessage(chatWeather.getChatId(), message).enableMarkdown(true));
+        } catch (TelegramApiException e) {
+            log.error("Error sending message", e);
+        }
     }
 
     private Channel getForecastChannelForLocation(Location location) {
@@ -67,5 +58,4 @@ public class WeatherService {
         }
         return channel;
     }
-
 }

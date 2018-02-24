@@ -5,9 +5,9 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>ru.kolyat</groupId>
-  <artifactId>telegram-bot</artifactId>
-  <version>0.2.0</version>
+  <groupId>kolyat.telegram</groupId>
+  <artifactId>weather-bot</artifactId>
+  <version>0.3.0</version>
 
   <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent -->
   <parent>
@@ -75,6 +75,13 @@
     <dependency>
       <groupId>org.telegram</groupId>
       <artifactId>telegrambots</artifactId>
+      <version>${telegrambots.version}</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.telegram/telegrambotsextensions -->
+    <dependency>
+      <groupId>org.telegram</groupId>
+      <artifactId>telegrambotsextensions</artifactId>
       <version>${telegrambots.version}</version>
     </dependency>
 

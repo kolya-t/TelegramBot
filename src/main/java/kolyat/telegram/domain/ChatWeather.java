@@ -11,7 +11,7 @@ import javax.persistence.Id;
 
 @Data
 @Entity
-public class ChatParameters implements Persistable<Long> {
+public class ChatWeather implements Persistable<Long> {
     @Id
     @GeneratedValue
     private Long id;
@@ -23,21 +23,21 @@ public class ChatParameters implements Persistable<Long> {
     private Location location;
 
     @Column(nullable = false)
-    private Boolean isEnabledScheduling;
+    private Boolean subscribed;
 
     @SuppressWarnings("unused")
-    public ChatParameters() {
+    public ChatWeather() {
     }
 
-    public ChatParameters(Long chatId, Location location) {
+    public ChatWeather(Long chatId, Location location) {
         this(chatId, location, false);
     }
 
     @SuppressWarnings("WeakerAccess")
-    public ChatParameters(Long chatId, Location location, Boolean isEnabledScheduling) {
+    public ChatWeather(Long chatId, Location location, Boolean subscribed) {
         this.chatId = chatId;
         this.location = location;
-        this.isEnabledScheduling = isEnabledScheduling;
+        this.subscribed = subscribed;
     }
 
     @Override

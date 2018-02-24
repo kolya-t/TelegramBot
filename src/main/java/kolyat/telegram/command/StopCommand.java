@@ -1,6 +1,5 @@
 package kolyat.telegram.command;
 
-import kolyat.telegram.domain.ChatWeather;
 import kolyat.telegram.repository.ChatWeatherRepository;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +24,12 @@ public class StopCommand extends BotCommand {
     @Override
     @SneakyThrows(TelegramApiException.class)
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
-        ChatWeather chatWeather = chatWeatherRepository.findByChatId(chat.getId());
-        if (chatWeather != null) {
-            chatWeatherRepository.delete(chatWeather);
-            absSender.execute(new SendMessage()
-                    .setChatId(chat.getId())
-                    .setReplyMarkup(new ReplyKeyboardRemove())
-                    .setText("Удаляю все данные о вас из базы. Больше не буду присылать вам погоду."));
+        if (chatWeatherRepository.existsByChatId(chat.getId())) {
+            chatWeatherRepository.deleteByChatId(chat.getId());
         }
+        absSender.execute(new SendMessage()
+                .setChatId(chat.getId())
+                .setReplyMarkup(new ReplyKeyboardRemove())
+                .setText("Удаляю все данные о вас из базы. Больше не буду присылать вам погоду."));
     }
 }

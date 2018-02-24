@@ -7,12 +7,11 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.bots.commandbot.commands.BotCommand;
-
-import javax.annotation.PostConstruct;
 
 @Slf4j
 @Component
@@ -32,10 +31,11 @@ public class Bot extends TelegramLongPollingCommandBot {
         registerAll(commands);
     }
 
-    @PostConstruct
-    public void postConstructorSchedule() {
+    //    @Scheduled(cron = "0 0/30 6 * * *")
+    @Scheduled(cron = "*/3 * * * * *")
+    public void sendForecastForTodayToAll() {
         for (ChatWeather chatWeather : chatWeatherRepository.findAllBySubscribed(true)) {
-            weatherService.schedule(this, chatWeather);
+            weatherService.sendForecastForToday(this, chatWeather);
         }
     }
 

@@ -1,6 +1,8 @@
 package kolyat.telegram.command;
 
+import kolyat.telegram.repository.ChatWeatherRepository;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Chat;
@@ -16,6 +18,9 @@ import java.util.Collections;
 
 @Component
 public class StartCommand extends BotCommand {
+    @Autowired
+    private ChatWeatherRepository chatWeatherRepository;
+
     public StartCommand() {
         super("start", "");
     }
@@ -23,6 +28,10 @@ public class StartCommand extends BotCommand {
     @Override
     @SneakyThrows(TelegramApiException.class)
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
+        if (chatWeatherRepository.existsByChatId(chat.getId())) {
+            chatWeatherRepository.deleteByChatId(chat.getId());
+        }
+
         SendMessage answer = new SendMessage()
                 .setChatId(chat.getId())
                 .setText("Я буду узнавать для вас прогноз погоды. " +

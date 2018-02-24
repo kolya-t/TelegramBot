@@ -7,9 +7,6 @@ import com.github.fedy2.weather.data.unit.DegreeUnit;
 import kolyat.telegram.domain.ChatWeather;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Location;
@@ -22,20 +19,11 @@ import java.io.IOException;
 @Slf4j
 @Service
 public class WeatherService {
-    //    private static final String SIX_THIRTY_TRIGGER = new CronTrigger("0 0/30 6 * * *");
-    private static final Trigger SIX_THIRTY_TRIGGER = new CronTrigger("*/3 * * * * *");
 
     @Autowired
     private YahooWeatherService weatherService;
 
-    @Autowired
-    private TaskScheduler taskScheduler;
-
-    public void schedule(AbsSender absSender, ChatWeather chatWeather) {
-        taskScheduler.schedule(() -> sendForecastForToday(absSender, chatWeather), SIX_THIRTY_TRIGGER);
-    }
-
-    private void sendForecastForToday(AbsSender absSender, ChatWeather chatWeather) {
+    public void sendForecastForToday(AbsSender absSender, ChatWeather chatWeather) {
         try {
             Channel forecast = getForecastChannelForLocation(chatWeather.getLocation());
             Forecast today = forecast.getItem().getForecasts().get(0);

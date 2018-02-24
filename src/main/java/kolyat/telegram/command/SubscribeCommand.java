@@ -2,7 +2,6 @@ package kolyat.telegram.command;
 
 import kolyat.telegram.domain.ChatWeather;
 import kolyat.telegram.repository.ChatWeatherRepository;
-import kolyat.telegram.service.WeatherService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +20,6 @@ public class SubscribeCommand extends BotCommand {
     @Autowired
     private ChatWeatherRepository chatWeatherRepository;
 
-    @Autowired
-    private WeatherService weatherService;
-
     public SubscribeCommand() {
         super("subscribe", "");
     }
@@ -33,7 +29,6 @@ public class SubscribeCommand extends BotCommand {
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
         ChatWeather chatWeather = chatWeatherRepository.findByChatId(chat.getId());
         if (chatWeather != null && !chatWeather.getSubscribed()) {
-            weatherService.schedule(absSender, chatWeather);
             chatWeather.setSubscribed(true);
             chatWeatherRepository.save(chatWeather);
             absSender.execute(new SendMessage()

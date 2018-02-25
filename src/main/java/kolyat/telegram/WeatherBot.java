@@ -91,10 +91,9 @@ public class WeatherBot extends TelegramLongPollingCommandBot {
                 .setChatId(chat.getId())
                 .setReplyMarkup(new ReplyKeyboardRemove());
 
-        Channel channel = weatherService.getForecastChannelForLocation(location);
         ChatWeather chatWeather = chatWeatherRepository.findByChatId(chat.getId());
-
         if (chatWeather == null) {
+            Channel channel = weatherService.getForecastChannelForLocation(location);
             if (channel != null) {
                 chatWeatherRepository.save(new ChatWeather(chat.getId(), location));
                 answer.enableMarkdown(true)
@@ -108,8 +107,7 @@ public class WeatherBot extends TelegramLongPollingCommandBot {
                 answer.setReplyMarkup(createKeyboardMarkup(false, chat.isUserChat()))
                         .setText("Не могу получить данные о погоде по вашей геопозиции");
             }
+            execute(answer);
         }
-
-        execute(answer);
     }
 }

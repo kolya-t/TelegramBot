@@ -63,7 +63,7 @@ public class WeatherBot extends TelegramLongPollingCommandBot {
                         .setOneTimeKeyboard(true);
     }
 
-    @Scheduled(cron = "0 0/30 6 * * *")
+    @Scheduled(cron = "0 30 6 * * *", zone = "GMT+3:00")
     public void sendForecastForTodayToAll() {
         for (ChatWeather chatWeather : chatWeatherRepository.findAllBySubscribed(true)) {
             weatherService.sendForecastForToday(this, chatWeather);

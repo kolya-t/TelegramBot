@@ -6,3 +6,10 @@ To start bot, you need:
 ```jshelllanguage
 java -jar ${BOT_AND_DATABASE_PARAMETERS} telegram-bot-1.0.0.jar 
 ```
+
+Plan: 
+- [ ] Sending an error report to me in PM
+- [ ] Add support for multiple languages
+- [ ] In addition to the degrees show and other weather information, for example "sunny", "rainstorm". Add the appropriate emoji
+- [ ] Selecting the time when to send the weather forecast
+- [ ] To make the user time zone dependent

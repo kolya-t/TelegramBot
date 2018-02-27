@@ -4,6 +4,7 @@ import com.github.fedy2.weather.YahooWeatherService;
 import com.github.fedy2.weather.data.Channel;
 import com.github.fedy2.weather.data.Forecast;
 import com.github.fedy2.weather.data.unit.DegreeUnit;
+import kolyat.telegram.WeatherBot;
 import kolyat.telegram.domain.ChatWeather;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,11 @@ public class WeatherService {
             Channel forecast = getForecastChannelForLocation(chatWeather.getLocation());
             Forecast today = forecast.getItem().getForecasts().get(0);
             String message = String.format("Сегодня будет\n*%d* .. *%d*°C", today.getLow(), today.getHigh());
-            absSender.execute(new SendMessage(chatWeather.getChatId(), message).enableMarkdown(true));
+            absSender.execute(new SendMessage()
+                    .setChatId(chatWeather.getChatId())
+                    .setText(message)
+                    .enableMarkdown(true)
+                    .setReplyMarkup(WeatherBot.createKeyboardMarkup(true, false)));
         } catch (TelegramApiException e) {
             log.error("Error sending message", e);
         }
